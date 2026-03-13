@@ -21,6 +21,10 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Use tag version
         run: echo "ORG_GRADLE_PROJECT_projectVersion=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
+      - name: Build ENV
+        run: |
+          echo "export ORG_GRADLE_PROJECT_signingInMemoryKey=" > .env
+          echo "${{ secrets.GPG_KEY_CONTENTS }}" | base64 -d >> .env
       - name: Publish lib
         run: ./gradlew lib:publishToMavenCentral --no-configuration-cache
         env:
@@ -29,6 +33,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
-          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.GPG_KEY_CONTENTS }}
+          #ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.GPG_KEY_CONTENTS }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.SIGNING_KEY_ID }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_PASSWORD }}
