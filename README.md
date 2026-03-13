@@ -58,6 +58,10 @@ System.out.println(result.imageDigest());
 gradle run --args='--addr unix:///run/buildkit/buildkitd.sock --context /tmp/app --dockerfile /tmp/app/Dockerfile --image example.com/demo:latest'
 ```
 
+```bash
+gradle run --args='--addr tcp://localhost:1234 --context /tmp/app --dockerfile /tmp/app/Dockerfile --image example.com/demo:latest'
+```
+
 To load the result into your local Docker daemon instead of exporting it as a BuildKit image:
 
 ```bash
