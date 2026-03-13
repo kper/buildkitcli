@@ -16,7 +16,7 @@ val assertjVersion = "3.27.6"
 val testcontainersVersion = "2.0.3"
 
 base {
-    archivesName.set("buildkitcli")
+    archivesName.set("buildkitcli-lib")
 }
 
 dependencies {
