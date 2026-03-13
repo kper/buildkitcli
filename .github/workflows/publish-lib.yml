@@ -21,14 +21,23 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Use tag version
         run: echo "ORG_GRADLE_PROJECT_projectVersion=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
+      - name: Setup .gradle
+        run: |
+          echo "mavenCentralUsername=$ORG_GRADLE_PROJECT_mavenCentralUsername" >> gradle.properties
+          echo "mavenCentralPassword=$ORG_GRADLE_PROJECT_mavenCentralPassword" >> gradle.properties
+          echo "signingInMemoryKey=$ORG_GRADLE_PROJECT_signingInMemoryKey" >> gradle.properties
+          echo "signingInMemoryKeyId=$ORG_GRADLE_PROJECT_signingInMemoryKeyId" >> gradle.properties
+          echo "signingInMemoryKeyPassword=$ORG_GRADLE_PROJECT_signingInMemoryKeyPassword" >> gradle.properties
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.GPG_KEY_CONTENTS }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.SIGNING_KEY_ID }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_PASSWORD }}
       - name: Publish lib
         run: ./gradlew lib:publishToMavenCentral --no-configuration-cache
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
-          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
-          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.GPG_KEY_CONTENTS }}
-          ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.SIGNING_KEY_ID }}
-          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_PASSWORD }}
+
