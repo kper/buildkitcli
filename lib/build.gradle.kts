@@ -87,12 +87,19 @@ publishing {
 
     repositories {
         maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/kper/buildkitcli")
+            url = uri(
+                if (version.toString().endsWith("SNAPSHOT"))
+                    "https://central.sonatype.com/repository/maven-snapshots/"
+                else
+                    "https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/"
+            )
             credentials {
-                username = System.getenv("GITHUB_ACTOR")
-                password = System.getenv("GITHUB_TOKEN")
+                username = providers.environmentVariable("ossrhUsername").orElse("").get()
+                password = providers.environmentVariable("ossrhPassword").orElse("").get()
             }
         }
+
+        mavenLocal()
     }
+
 }
