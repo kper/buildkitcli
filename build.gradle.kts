@@ -30,6 +30,8 @@ tasks.withType<JavaCompile>().configureEach {
 }
 
 dependencies {
+    implementation("ch.qos.logback:logback-classic:1.4.14")
+
     implementation(platform("io.grpc:grpc-bom:$grpcVersion"))
     implementation("io.grpc:grpc-netty")
     implementation("io.grpc:grpc-protobuf")

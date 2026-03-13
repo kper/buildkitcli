@@ -7,6 +7,9 @@ import io.github.kper.buildkit.BuildkitClient;
 import io.github.kper.buildkit.BuildkitConnectionConfig;
 import io.github.kper.buildkit.DockerfileBuildRequest;
 import io.github.kper.buildkit.TlsConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -16,9 +19,9 @@ import java.util.List;
 import java.util.Map;
 
 public final class BuildkitCli {
-    private BuildkitCli() {}
-
     public static void main(String[] args) throws Exception {
+        Logger logger = LoggerFactory.getLogger(BuildkitCli.class);
+
         Map<String, String> options = new HashMap<>();
         List<String> buildArgs = new ArrayList<>();
         boolean push = false;
@@ -74,9 +77,9 @@ public final class BuildkitCli {
             if (load) {
                 loadIntoDocker(result);
             }
-            System.out.println("ref=" + result.ref());
+            logger.atInfo().log("ref=" + result.ref());
             if (result.imageDigest() != null) {
-                System.out.println("digest=" + result.imageDigest());
+                logger.atInfo().log("digest=" + result.imageDigest());
             }
         }
     }
@@ -127,10 +130,12 @@ public final class BuildkitCli {
     }
 
     private static final class PrintingListener implements BuildProgressListener {
+        private final Logger logger = LoggerFactory.getLogger(PrintingListener.class);
+
         @Override
         public void onVertex(io.github.kper.buildkit.BuildVertex vertex) {
             if (!vertex.name().isBlank()) {
-                System.err.println(vertex.name());
+                logger.atError().log(vertex.name());
             }
         }
 
@@ -138,13 +143,13 @@ public final class BuildkitCli {
         public void onLog(io.github.kper.buildkit.BuildLog log) {
             String message = log.utf8Message();
             if (!message.isBlank()) {
-                System.err.print(message);
+                logger.atInfo().log(message);
             }
         }
 
         @Override
         public void onWarning(io.github.kper.buildkit.BuildWarning warning) {
-            System.err.println("warning: " + warning.shortMessage());
+            logger.atError().log("warning: " + warning.shortMessage());
         }
     }
 }
