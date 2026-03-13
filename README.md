@@ -24,11 +24,11 @@ gradle build
 ## Library usage
 
 ```java
-import io.github.kper.buildkitcli.BuildProgressListener;
-import io.github.kper.buildkitcli.BuildResult;
-import io.github.kper.buildkitcli.BuildkitClient;
-import io.github.kper.buildkitcli.BuildkitConnectionConfig;
-import io.github.kper.buildkitcli.DockerfileBuildRequest;
+import lib.io.github.kper.buildkitcli.lib.BuildProgressListener;
+import lib.io.github.kper.buildkitcli.lib.BuildResult;
+import lib.io.github.kper.buildkitcli.lib.BuildkitClient;
+import lib.io.github.kper.buildkitcli.lib.BuildkitConnectionConfig;
+import lib.io.github.kper.buildkitcli.lib.DockerfileBuildRequest;
 
 import java.net.URI;
 import java.time.Duration;
