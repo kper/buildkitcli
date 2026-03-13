@@ -2,8 +2,7 @@ import org.gradle.api.publish.maven.MavenPublication
 
 plugins {
     `java-library`
-    `maven-publish`
-    signing
+    id("com.vanniktech.maven.publish") version "0.36.0"
     id("com.google.protobuf") version "0.9.5"
 }
 
@@ -17,13 +16,8 @@ val junitVersion = "5.13.4"
 val assertjVersion = "3.27.6"
 val testcontainersVersion = "2.0.3"
 
-java {
-    withJavadocJar()
-    withSourcesJar()
-}
-
 base {
-    archivesName.set("buildkit-java-client")
+    archivesName.set("buildkitcli")
 }
 
 dependencies {
@@ -72,34 +66,34 @@ protobuf {
     }
 }
 
-publishing {
-    publications {
-        create<MavenPublication>("mavenJava") {
-            artifactId = "buildkitcli"
-            from(components["java"])
+mavenPublishing {
+    publishToMavenCentral()
 
-            pom {
-                name.set("buildkitcli")
-                description.set(project.description)
+    signAllPublications()
+    coordinates(group.toString(), name, version.toString())
+
+    pom {
+        name = "buildkitcli"
+        inceptionYear = "2026"
+        url = "https://github.com/kper/buildkitcli/"
+        licenses {
+            license {
+                name = "The Apache License, Version 2.0"
+                url = "https://www.apache.org/licenses/LICENSE-2.0.txt"
+                distribution = "https://www.apache.org/licenses/LICENSE-2.0.txt"
             }
         }
-    }
-
-    repositories {
-        maven {
-            url = uri(
-                if (version.toString().endsWith("SNAPSHOT"))
-                    "https://central.sonatype.com/repository/maven-snapshots/"
-                else
-                    "https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/"
-            )
-            credentials {
-                username = providers.environmentVariable("ossrhUsername").orElse("").get()
-                password = providers.environmentVariable("ossrhPassword").orElse("").get()
+        developers {
+            developer {
+                id = "kper"
+                name = "Kevin Per"
+                url = "https://github.com/kper/"
             }
         }
-
-        mavenLocal()
+        scm {
+            url = "https://github.com/kper/buildkitcli/"
+            connection = "scm:git:git://github.com/kper/buildkitcli.git"
+            developerConnection = "scm:git:ssh://git@github.com/kper/buildkitcli.git"
+        }
     }
-
 }

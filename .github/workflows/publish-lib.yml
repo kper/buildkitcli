@@ -2,7 +2,7 @@ name: Publish Library
 
 on:
   release:
-    types: [ created ]
+    types: [ released ]
   workflow_dispatch:
 
 jobs:
@@ -30,6 +30,9 @@ jobs:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ossrhUsername: ${{ env.OSSRHUSERNAME }}
-          ossrhPassword: ${{ secrets.OSSRHPASSWORD }}
-        run: ./gradlew :lib:publish
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.SIGNING_KEY_ID }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.GPG_KEY_CONTENTS }}
+        run: ./gradlew publishToMavenCentral --no-configuration-cache
