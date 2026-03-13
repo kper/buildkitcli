@@ -24,11 +24,11 @@ gradle build
 ## Library usage
 
 ```java
-import io.github.kper.buildkit.BuildProgressListener;
-import io.github.kper.buildkit.BuildResult;
-import io.github.kper.buildkit.BuildkitClient;
-import io.github.kper.buildkit.BuildkitConnectionConfig;
-import io.github.kper.buildkit.DockerfileBuildRequest;
+import io.github.kper.buildkitcli.BuildProgressListener;
+import io.github.kper.buildkitcli.BuildResult;
+import io.github.kper.buildkitcli.BuildkitClient;
+import io.github.kper.buildkitcli.BuildkitConnectionConfig;
+import io.github.kper.buildkitcli.DockerfileBuildRequest;
 
 import java.net.URI;
 import java.time.Duration;
@@ -49,7 +49,9 @@ DockerfileBuildRequest request = DockerfileBuildRequest.builder(
 BuildkitClient client = new BuildkitClient(config);
 BuildResult result = client.buildImage(request, BuildProgressListener.NOOP);
 
-System.out.println(result.imageDigest());
+System.out.
+
+println(result.imageDigest());
 ```
 
 ## CLI example
