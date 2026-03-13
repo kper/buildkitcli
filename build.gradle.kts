@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "io.github.kper"
-version = providers.gradleProperty("projectVersion").getOrElse("0.1.0-SNAPSHOT")
+version = providers.gradleProperty("projectVersion")
 
 allprojects {
     group = rootProject.group
