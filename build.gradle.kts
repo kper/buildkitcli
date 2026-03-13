@@ -13,7 +13,7 @@ val googleCommonProtoVersion = "2.58.0"
 val nettyVersion = "4.1.121.Final"
 val junitVersion = "5.13.4"
 val assertjVersion = "3.27.6"
-val testcontainersVersion = "1.21.3"
+val testcontainersVersion = "2.0.3"
 
 repositories {
     mavenCentral()
@@ -55,7 +55,7 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.assertj:assertj-core:$assertjVersion")
     testImplementation("io.grpc:grpc-inprocess")
-    testImplementation("org.testcontainers:junit-jupiter:$testcontainersVersion")
+    testImplementation("org.testcontainers:junit-jupiter:1.21.4")
     testImplementation("org.testcontainers:testcontainers:$testcontainersVersion")
 }
 
