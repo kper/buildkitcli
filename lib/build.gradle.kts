@@ -1,11 +1,13 @@
+import org.gradle.api.publish.maven.MavenPublication
+
 plugins {
     `java-library`
-    application
+    `maven-publish`
+    signing
     id("com.google.protobuf") version "0.9.5"
 }
 
-group = "io.github.kper"
-version = "0.1.0-SNAPSHOT"
+description = "Pure Java BuildKit client library."
 
 val grpcVersion = "1.76.0"
 val protobufVersion = "3.25.6"
@@ -15,23 +17,16 @@ val junitVersion = "5.13.4"
 val assertjVersion = "3.27.6"
 val testcontainersVersion = "2.0.3"
 
-repositories {
-    mavenCentral()
-}
-
 java {
     withJavadocJar()
     withSourcesJar()
 }
 
-tasks.withType<JavaCompile>().configureEach {
-    options.encoding = "UTF-8"
-    options.release.set(21)
+base {
+    archivesName.set("buildkit-java-client")
 }
 
 dependencies {
-    implementation("ch.qos.logback:logback-classic:1.4.14")
-
     implementation(platform("io.grpc:grpc-bom:$grpcVersion"))
     implementation("io.grpc:grpc-netty")
     implementation("io.grpc:grpc-protobuf")
@@ -77,10 +72,47 @@ protobuf {
     }
 }
 
-tasks.test {
-    useJUnitPlatform()
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            artifactId = "buildkit-java-client"
+            from(components["java"])
+
+            pom {
+                name.set("buildkit-java-client")
+                description.set(project.description)
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name = "release"
+
+            val githubRepository = providers.environmentVariable("GITHUB_REPOSITORY")
+            val configuredRepository = providers.environmentVariable("MAVEN_REPOSITORY_URL")
+                .orElse(githubRepository.map { "https://maven.pkg.github.com/$it" })
+
+            url = uri(configuredRepository.orElse(layout.buildDirectory.dir("repo").map { it.asFile.toURI().toString() }).get())
+
+            credentials {
+                username = providers.environmentVariable("MAVEN_USERNAME")
+                    .orElse(providers.environmentVariable("GITHUB_ACTOR"))
+                    .orNull
+                password = providers.environmentVariable("MAVEN_PASSWORD")
+                    .orElse(providers.environmentVariable("GITHUB_TOKEN"))
+                    .orNull
+            }
+        }
+    }
 }
 
-application {
-    mainClass = "io.github.kper.buildkit.cli.BuildkitCli"
+signing {
+    val signingKey = providers.environmentVariable("MAVEN_SIGNING_KEY")
+    val signingPassword = providers.environmentVariable("MAVEN_SIGNING_PASSWORD")
+
+    if (signingKey.isPresent) {
+        useInMemoryPgpKeys(signingKey.get(), signingPassword.orNull)
+        sign(publishing.publications["mavenJava"])
+    }
 }

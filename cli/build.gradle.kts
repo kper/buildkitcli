@@ -1,31 +1,27 @@
 plugins {
-    id("java")
     application
 }
 
-group = "io.github.kper"
-version = "0.1.0-SNAPSHOT"
+description = "Command-line interface for the BuildKit Java client."
 
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    implementation("ch.qos.logback:logback-classic:1.4.14")
-
-    testImplementation(platform("org.junit:junit-bom:5.10.0"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-}
+val junitVersion = "5.13.4"
+val slf4jVersion = "2.0.17"
+val logbackVersion = "1.4.14"
 
 application {
     mainClass.set("io.github.kper.buildkitcli.cli.BuildkitCli")
 }
 
-dependencies {
-    implementation(project(":lib"))
+base {
+    archivesName.set("buildkit-java-client-cli")
 }
 
-tasks.test {
-    useJUnitPlatform()
+dependencies {
+    implementation(project(":lib"))
+    implementation("org.slf4j:slf4j-api:$slf4jVersion")
+    runtimeOnly("ch.qos.logback:logback-classic:$logbackVersion")
+
+    testImplementation(platform("org.junit:junit-bom:$junitVersion"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }

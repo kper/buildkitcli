@@ -13,7 +13,7 @@ public class PrintingListener implements BuildProgressListener {
     @Override
     public void onVertex(BuildVertex vertex) {
         if (!vertex.name().isBlank()) {
-            logger.atError().log(vertex.name());
+            logger.atDebug().log(vertex.name());
         }
     }
 
