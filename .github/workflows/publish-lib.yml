@@ -21,23 +21,32 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Use tag version
         run: echo "ORG_GRADLE_PROJECT_projectVersion=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
-      - name: Setup .gradle
-        run: |
-          echo "mavenCentralUsername=$ORG_GRADLE_PROJECT_mavenCentralUsername" >> gradle.properties
-          echo "mavenCentralPassword=$ORG_GRADLE_PROJECT_mavenCentralPassword" >> gradle.properties
-          echo "signingInMemoryKey=$ORG_GRADLE_PROJECT_signingInMemoryKey" >> gradle.properties
-          echo "signingInMemoryKeyId=$ORG_GRADLE_PROJECT_signingInMemoryKeyId" >> gradle.properties
-          echo "signingInMemoryKeyPassword=$ORG_GRADLE_PROJECT_signingInMemoryKeyPassword" >> gradle.properties
+      - name: Prepare signing key
+        shell: bash
         env:
-          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
-          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
-          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.GPG_KEY_CONTENTS }}
-          ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.SIGNING_KEY_ID }}
-          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.ORG_GRADLE_PROJECT_signingInMemoryKey || vars.ORG_GRADLE_PROJECT_signingInMemoryKey }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.ORG_GRADLE_PROJECT_signingInMemoryKeyId || vars.ORG_GRADLE_PROJECT_signingInMemoryKeyId }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.ORG_GRADLE_PROJECT_signingInMemoryKeyPassword || vars.ORG_GRADLE_PROJECT_signingInMemoryKeyPassword }}
+        run: |
+          if [[ -z "$ORG_GRADLE_PROJECT_signingInMemoryKey" ]]; then
+            echo "::error::Missing ORG_GRADLE_PROJECT_signingInMemoryKey"
+            exit 1
+          fi
+
+          keyring_file="$RUNNER_TEMP/signing-key.gpg"
+          printf '%s' "$ORG_GRADLE_PROJECT_signingInMemoryKey" | base64 --decode > "$keyring_file"
+
+          mkdir -p "$HOME/.gradle"
+          {
+            echo "signing.keyId=$ORG_GRADLE_PROJECT_signingInMemoryKeyId"
+            echo "signing.password=$ORG_GRADLE_PROJECT_signingInMemoryKeyPassword"
+            echo "signing.secretKeyRingFile=$keyring_file"
+          } >> "$HOME/.gradle/gradle.properties"
       - name: Publish lib
         run: ./gradlew lib:publishToMavenCentral --no-configuration-cache
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.ORG_GRADLE_PROJECT_mavenCentralUsername || vars.ORG_GRADLE_PROJECT_mavenCentralUsername }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.ORG_GRADLE_PROJECT_mavenCentralPassword || vars.ORG_GRADLE_PROJECT_mavenCentralPassword }}
