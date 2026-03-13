@@ -24,7 +24,9 @@ jobs:
       - name: Build ENV
         run: |
           echo "export ORG_GRADLE_PROJECT_signingInMemoryKey=" > .env
-          echo "${{ secrets.GPG_KEY_CONTENTS }}" | base64 -d >> .env
+          echo "$BASE" | base64 -d >> .env
+        env:
+          BASE: ${{ secrets.GPG_KEY_CONTENTS }}
       - name: Publish lib
         run: ./gradlew lib:publishToMavenCentral --no-configuration-cache
         env:
