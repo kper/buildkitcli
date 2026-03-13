@@ -75,11 +75,11 @@ protobuf {
 publishing {
     publications {
         create<MavenPublication>("mavenJava") {
-            artifactId = "buildkit-java-client"
+            artifactId = "buildkitcli"
             from(components["java"])
 
             pom {
-                name.set("buildkit-java-client")
+                name.set("buildkitcli")
                 description.set(project.description)
             }
         }
@@ -87,18 +87,11 @@ publishing {
 
     repositories {
         maven {
-            name = "release"
-
-            val releasesRepoUrl = uri(layout.buildDirectory.dir("repos/releases"))
-            url = releasesRepoUrl
-
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/kper/buildkitcli")
             credentials {
-                username = providers.environmentVariable("MAVEN_USERNAME")
-                    .orElse(providers.environmentVariable("GITHUB_ACTOR"))
-                    .orNull
-                password = providers.environmentVariable("MAVEN_PASSWORD")
-                    .orElse(providers.environmentVariable("GITHUB_TOKEN"))
-                    .orNull
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
             }
         }
     }
