@@ -1,15 +1,9 @@
 name: Publish Library
 
 on:
-  push:
-    tags:
-      - 'v*'
+  release:
+    types: [ created ]
   workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version to publish. Defaults to gradle.properties when left empty.'
-        required: false
-        type: string
 
 jobs:
   publish:
@@ -29,12 +23,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
 
       - name: Use tag version
-        if: startsWith(github.ref, 'refs/tags/v')
         run: echo "ORG_GRADLE_PROJECT_projectVersion=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
-
-      - name: Use manual version
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.version != ''
-        run: echo "ORG_GRADLE_PROJECT_projectVersion=${{ github.event.inputs.version }}" >> "$GITHUB_ENV"
 
       - name: Publish lib
         env:
