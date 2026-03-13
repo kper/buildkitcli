@@ -89,11 +89,8 @@ publishing {
         maven {
             name = "release"
 
-            val githubRepository = providers.environmentVariable("GITHUB_REPOSITORY")
             val configuredRepository = providers.environmentVariable("MAVEN_REPOSITORY_URL")
-                .orElse(githubRepository.map { "https://maven.pkg.github.com/$it" })
-
-            url = uri(configuredRepository.orElse(layout.buildDirectory.dir("repo").map { it.asFile.toURI().toString() }).get())
+            url = uri(configuredRepository.get())
 
             credentials {
                 username = providers.environmentVariable("MAVEN_USERNAME")
