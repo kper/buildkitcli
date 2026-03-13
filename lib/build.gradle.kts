@@ -89,8 +89,8 @@ publishing {
         maven {
             name = "release"
 
-            val configuredRepository = providers.environmentVariable("MAVEN_REPOSITORY_URL")
-            url = uri(configuredRepository.get())
+            val releasesRepoUrl = uri(layout.buildDirectory.dir("repos/releases"))
+            url = releasesRepoUrl
 
             credentials {
                 username = providers.environmentVariable("MAVEN_USERNAME")
