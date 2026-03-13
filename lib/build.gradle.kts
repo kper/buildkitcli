@@ -1,7 +1,6 @@
-import org.gradle.api.publish.maven.MavenPublication
-
 plugins {
     `java-library`
+    signing
     id("com.vanniktech.maven.publish") version "0.36.0"
     id("com.google.protobuf") version "0.9.5"
 }
@@ -70,10 +69,11 @@ mavenPublishing {
     publishToMavenCentral()
 
     signAllPublications()
-    coordinates(group.toString(), name, version.toString())
+    coordinates(group.toString(), "buildkitcli", version.toString())
 
     pom {
         name = "buildkitcli"
+        description = project.description
         inceptionYear = "2026"
         url = "https://github.com/kper/buildkitcli/"
         licenses {

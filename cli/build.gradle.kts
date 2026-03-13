@@ -13,7 +13,7 @@ application {
 }
 
 base {
-    archivesName.set("buildkit-java-client-cli")
+    archivesName.set("buildkitcli")
 }
 
 dependencies {
