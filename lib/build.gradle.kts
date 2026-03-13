@@ -103,13 +103,3 @@ publishing {
         }
     }
 }
-
-signing {
-    val signingKey = providers.environmentVariable("MAVEN_SIGNING_KEY")
-    val signingPassword = providers.environmentVariable("MAVEN_SIGNING_PASSWORD")
-
-    if (signingKey.isPresent) {
-        useInMemoryPgpKeys(signingKey.get(), signingPassword.orNull)
-        sign(publishing.publications["mavenJava"])
-    }
-}
