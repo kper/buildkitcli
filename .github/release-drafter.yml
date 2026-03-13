@@ -1,0 +1,27 @@
+name-template: 'v$RESOLVED_VERSION'
+tag-template: 'v$RESOLVED_VERSION'
+template: |
+  $CHANGES
+  
+  **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
+
+sort-by: title
+sort-direction: ascending
+
+categories:
+  - title: 'New'
+    label: 'enhancement'
+  - title: 'Bug Fixes'
+    labels:
+      - 'bug'
+
+# We currently strictly increase the minor version.
+# This is going to change once we reach a stable state.
+version-resolver:
+  major:
+    labels: [ ]
+  minor:
+    labels: [ ]
+  patch:
+    labels: [ ]
+  default: minor

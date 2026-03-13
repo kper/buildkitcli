@@ -1,0 +1,54 @@
+name: draft-release.yml
+on:
+  workflow_dispatch:
+    push:
+      branches:
+        - master
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-drafter
+  cancel-in-progress: true
+
+jobs:
+  update-draft-release:
+    name: Update Release Draft
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: read
+    outputs:
+      version: ${{ steps.release-drafter.outputs.resolved_version }}
+    steps:
+      - uses: release-drafter/release-drafter@v6
+        id: release-drafter
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: |
+          echo "Version: ${{ steps.release-drafter.outputs.resolved_version }}"
+
+  build-and-upload-native:
+    needs: update-draft-release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      - name: Set Up Build Environment
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      - name: Build
+        run: |
+          ./gradlew jar
+      - name: Upload Executable to Draft Release
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: true
+          files: build/libs/*.jar
+          tag_name: v${{ needs.update-draft-release.outputs.version }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
