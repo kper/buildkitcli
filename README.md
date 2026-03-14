@@ -26,7 +26,7 @@ Groovy:
 
 ```groovy
 dependencies {
-    implementation 'io.github.kper:buildkitcli:0.12.0'
+    implementation 'io.github.kper:buildkitcli:0.13.0'
 }
 ```
 
@@ -34,7 +34,7 @@ Kotlin:
 
 ```kotlin
 dependencies {
-    implementation("io.github.kper:buildkitcli:0.12.0")
+    implementation("io.github.kper:buildkitcli:0.13.0")
 }
 ```
 
@@ -44,7 +44,7 @@ Maven:
 <dependency>
     <groupId>io.github.kper</groupId>
     <artifactId>buildkitcli</artifactId>
-    <version>0.12.0</version>
+    <version>0.13.0</version>
 </dependency>
 ```
 
