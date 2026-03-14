@@ -7,12 +7,12 @@ plugins {
 
 description = "Pure Java BuildKit client library."
 
-val grpcVersion = "1.76.0"
+val grpcVersion = "1.79.0"
 val protobufVersion = "3.25.6"
 val googleCommonProtoVersion = "2.58.0"
 val nettyVersion = "4.1.121.Final"
 val junitVersion = "5.13.4"
-val assertjVersion = "3.27.6"
+val assertjVersion = "3.27.7"
 val testcontainersVersion = "2.0.3"
 val slf4jVersion = "2.0.17"
 
