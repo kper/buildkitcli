@@ -72,7 +72,7 @@ public final class BuildkitCli {
         }
 
         try (BuildkitClient client = new BuildkitClient(connectionConfig)) {
-            BuildResult result = client.buildImage(requestBuilder.build(), new PrintingListener());
+            BuildResult result = client.buildImage(requestBuilder.build(), new io.github.kper.buildkitcli.lib.PrintingListener());
             if (load) {
                 loadIntoDocker(result);
             }
