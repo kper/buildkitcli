@@ -1,9 +1,5 @@
-package io.github.kper.buildkitcli.cli;
+package io.github.kper.buildkitcli.lib;
 
-import io.github.kper.buildkitcli.lib.BuildLog;
-import io.github.kper.buildkitcli.lib.BuildProgressListener;
-import io.github.kper.buildkitcli.lib.BuildVertex;
-import io.github.kper.buildkitcli.lib.BuildWarning;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

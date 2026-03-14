@@ -14,6 +14,7 @@ val nettyVersion = "4.1.121.Final"
 val junitVersion = "5.13.4"
 val assertjVersion = "3.27.6"
 val testcontainersVersion = "2.0.3"
+val slf4jVersion = "2.0.17"
 
 base {
     archivesName.set("buildkitcli-lib")
@@ -28,6 +29,7 @@ dependencies {
     implementation("com.google.protobuf:protobuf-java:$protobufVersion")
     implementation("com.google.api.grpc:proto-google-common-protos:$googleCommonProtoVersion")
     implementation("com.google.code.findbugs:jsr305:3.0.2")
+    implementation("org.slf4j:slf4j-api:${slf4jVersion}")
 
     implementation("io.netty:netty-transport-classes-epoll:$nettyVersion")
     implementation("io.netty:netty-transport-classes-kqueue:$nettyVersion")
