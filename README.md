@@ -73,50 +73,6 @@ try (BuildkitClient client = new BuildkitClient(config)) {
 }
 ```
 
-## Publish the library
-
-`lib` is configured with `maven-publish` and can publish to any Maven-compatible repository.
-
-- If `MAVEN_REPOSITORY_URL` is set, `:lib:publish` pushes there.
-- If `MAVEN_REPOSITORY_URL` is not set and the build runs in GitHub Actions, it falls back to the repository's GitHub Packages Maven URL.
-- If `MAVEN_SIGNING_KEY` is present, the publication is signed with in-memory PGP keys.
-
-Useful environment variables:
-
-- `MAVEN_REPOSITORY_URL`
-- `MAVEN_USERNAME`
-- `MAVEN_PASSWORD`
-- `MAVEN_SIGNING_KEY`
-- `MAVEN_SIGNING_PASSWORD`
-
-Local example:
-
-```bash
-./gradlew :lib:publish
-```
-
-## GitHub Actions
-
-Two workflows are included:
-
-- `test.yml`: builds and tests every module on pushes and pull requests
-- `publish-lib.yml`: publishes only `:lib` on `v*` tags or manual dispatch
-
-`publish-lib.yml` supports these secrets:
-
-- `MAVEN_REPOSITORY_URL`: optional override for a non-GitHub Maven repository
-- `MAVEN_USERNAME`: optional username override
-- `MAVEN_PASSWORD`: optional password/token override
-- `MAVEN_SIGNING_KEY`: optional ASCII-armored PGP private key
-- `MAVEN_SIGNING_PASSWORD`: optional PGP key password
-
-If you only want GitHub Packages, the default `GITHUB_TOKEN` plus `packages: write` permission is enough.
-
 ## Tests
 
-`./gradlew build` runs:
-
-- request-mapping unit tests
-- session-bridge unit tests
-- `FileSync` protocol tests
-- container-backed integration tests when Docker is available
+`./gradlew build`
