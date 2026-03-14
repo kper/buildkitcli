@@ -3,6 +3,9 @@ package io.github.kper.buildkitcli.lib;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+/**
+ * Record to create a tls configuration.
+ */
 public record TlsConfig(Path caCert, Path clientCert, Path clientKey, String serverNameOverride) {
     public TlsConfig {
         if (caCert != null && !Files.isReadable(caCert)) {

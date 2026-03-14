@@ -4,6 +4,9 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Arrays;
 
+/**
+ * Datastructure which contains build information for the client.
+ */
 public record BuildLog(String vertex, Instant timestamp, long stream, byte[] message) {
     public BuildLog {
         message = Arrays.copyOf(message, message.length);

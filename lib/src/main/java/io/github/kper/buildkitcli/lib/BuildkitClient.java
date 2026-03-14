@@ -10,6 +10,7 @@ import io.github.kper.buildkitcli.lib.internal.solve.SolveRequestFactory;
 import io.grpc.Context;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -26,9 +27,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+
 import moby.buildkit.v1.ControlGrpc;
 import moby.buildkit.v1.ControlOuterClass;
 
+/**
+ * Client implementation which connects to the buildkit daemon.
+ */
 public final class BuildkitClient implements AutoCloseable {
     private static final long STATUS_QUIET_PERIOD_NANOS = TimeUnit.SECONDS.toNanos(5);
 
@@ -37,6 +42,9 @@ public final class BuildkitClient implements AutoCloseable {
     private final ControlGrpc.ControlBlockingStub blockingStub;
     private final ControlGrpc.ControlStub asyncStub;
 
+    /**
+     * Constructor which initiates the connection.
+     */
     public BuildkitClient(BuildkitConnectionConfig connectionConfig) throws IOException {
         this.connectionConfig = Objects.requireNonNull(connectionConfig, "connectionConfig");
         this.channelResources = BuildkitChannelFactory.create(connectionConfig);
@@ -44,6 +52,14 @@ public final class BuildkitClient implements AutoCloseable {
         this.asyncStub = ControlGrpc.newStub(channelResources.channel());
     }
 
+    /**
+     * Builds an image.
+     *
+     * @param request  has the payload for the daemon to build the image.
+     * @param listener reports the progress in the client.
+     * @return the build result.
+     * @throws BuildkitException when an build error occurs.
+     */
     public BuildResult buildImage(DockerfileBuildRequest request, BuildProgressListener listener)
             throws BuildkitException, InterruptedException {
         Objects.requireNonNull(request, "request");
@@ -59,9 +75,9 @@ public final class BuildkitClient implements AutoCloseable {
                 "dockerfile", request.dockerfile().getParent());
 
         try (LoopbackSessionServer sessionServer = LoopbackSessionServer.start(sharedDirs, exportedArchive);
-                BuildkitSessionBridge ignored = BuildkitSessionBridge.start(
-                        asyncStub(), sessionId, "", sessionServer.exposedMethods(), sessionServer.address());
-                ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
+             BuildkitSessionBridge ignored = BuildkitSessionBridge.start(
+                     asyncStub(), sessionId, "", sessionServer.exposedMethods(), sessionServer.address());
+             ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
 
             Context.CancellableContext statusContext = Context.current().withCancellation();
             AtomicLong lastStatusActivity = new AtomicLong(System.nanoTime());

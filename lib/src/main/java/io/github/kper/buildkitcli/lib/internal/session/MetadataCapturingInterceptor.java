@@ -6,6 +6,9 @@ import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
 
+/**
+ * Class for interceptor.
+ */
 public final class MetadataCapturingInterceptor implements ServerInterceptor {
     @Override
     public <ReqT, RespT> io.grpc.ServerCall.Listener<ReqT> interceptCall(

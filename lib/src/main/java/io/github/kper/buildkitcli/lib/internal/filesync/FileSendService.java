@@ -2,15 +2,20 @@ package io.github.kper.buildkitcli.lib.internal.filesync;
 
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import moby.filesync.v1.FileSendGrpc;
 import moby.filesync.v1.Filesync;
 
+/**
+ * Service to send a file to the docker daemon.
+ */
 public final class FileSendService extends FileSendGrpc.FileSendImplBase {
     private final Path targetFile;
 
@@ -90,12 +95,15 @@ public final class FileSendService extends FileSendGrpc.FileSendImplBase {
 
     private static final class NoopStreamObserver implements StreamObserver<Filesync.BytesMessage> {
         @Override
-        public void onNext(Filesync.BytesMessage value) {}
+        public void onNext(Filesync.BytesMessage value) {
+        }
 
         @Override
-        public void onError(Throwable t) {}
+        public void onError(Throwable t) {
+        }
 
         @Override
-        public void onCompleted() {}
+        public void onCompleted() {
+        }
     }
 }
