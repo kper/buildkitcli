@@ -1,4 +1,4 @@
-# buildkit-java-client
+# buildkitcli
 
 Pure Java BuildKit client plus a separate CLI built on top of the library.
 
@@ -19,6 +19,34 @@ Current scope is intentionally small:
 - Supported exporters: `type=image`, `type=docker` (for local `docker load`)
 - Supported auth mode: anonymous/public registries only
 - Supported local context file types: regular files, directories, symlinks
+
+## Import
+
+Groovy:
+
+```groovy
+dependencies {
+    implementation 'io.github.kper:buildkitcli:0.12.0'
+}
+```
+
+Kotlin:
+
+```kotlin
+dependencies {
+    implementation("io.github.kper:buildkitcli:0.12.0")
+}
+```
+
+Maven:
+
+```
+<dependency>
+    <groupId>io.github.kper</groupId>
+    <artifactId>buildkitcli</artifactId>
+    <version>0.12.0</version>
+</dependency>
+```
 
 ## Build
 
@@ -67,9 +95,9 @@ DockerfileBuildRequest request = DockerfileBuildRequest.builder(
         .buildArg("VERSION", "1.0.0")
         .build();
 
-try (BuildkitClient client = new BuildkitClient(config)) {
-    BuildResult result = client.buildImage(request, BuildProgressListener.NOOP);
-    System.out.println(result.imageDigest());
+try(BuildkitClient client = new BuildkitClient(config)) {
+  BuildResult result = client.buildImage(request, BuildProgressListener.NOOP);
+  println(result.imageDigest());
 }
 ```
 
