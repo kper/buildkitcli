@@ -44,7 +44,7 @@ jobs:
             echo "signing.secretKeyRingFile=$keyring_file"
           } >> "$HOME/.gradle/gradle.properties"
       - name: Publish lib
-        run: ./gradlew lib:publishToMavenCentral --no-configuration-cache
+        run: ./gradlew lib:publishToMavenCentral -x javadoc --no-configuration-cache
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_REPOSITORY: ${{ github.repository }}

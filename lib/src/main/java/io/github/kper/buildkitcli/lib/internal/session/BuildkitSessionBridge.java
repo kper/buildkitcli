@@ -4,6 +4,7 @@ import com.google.protobuf.ByteString;
 import io.grpc.Metadata;
 import io.grpc.stub.MetadataUtils;
 import io.grpc.stub.StreamObserver;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -15,9 +16,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import moby.buildkit.v1.ControlGrpc;
 import moby.buildkit.v1.ControlOuterClass;
 
+/**
+ * Models a connection to the buildkit daemon.
+ */
 public final class BuildkitSessionBridge implements AutoCloseable {
     private static final Metadata.Key<String> SESSION_ID =
             Metadata.Key.of("x-docker-expose-session-uuid", Metadata.ASCII_STRING_MARSHALLER);
@@ -41,6 +46,9 @@ public final class BuildkitSessionBridge implements AutoCloseable {
         this.requestObserver = requestObserver;
     }
 
+    /**
+     * Starts the connection.
+     */
     public static BuildkitSessionBridge start(
             ControlGrpc.ControlStub baseStub,
             String sessionId,
@@ -63,26 +71,26 @@ public final class BuildkitSessionBridge implements AutoCloseable {
         StreamObserver<ControlOuterClass.BytesMessage> requestObserver =
                 baseStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
                         .session(new StreamObserver<ControlOuterClass.BytesMessage>() {
-                    @Override
-                    public void onNext(ControlOuterClass.BytesMessage value) {
-                        try {
-                            outputStream.write(value.getData().toByteArray());
-                            outputStream.flush();
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
+                            @Override
+                            public void onNext(ControlOuterClass.BytesMessage value) {
+                                try {
+                                    outputStream.write(value.getData().toByteArray());
+                                    outputStream.flush();
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
 
-                    @Override
-                    public void onError(Throwable t) {
-                        closeQuietly(socket);
-                    }
+                            @Override
+                            public void onError(Throwable t) {
+                                closeQuietly(socket);
+                            }
 
-                    @Override
-                    public void onCompleted() {
-                        closeQuietly(socket);
-                    }
-                });
+                            @Override
+                            public void onCompleted() {
+                                closeQuietly(socket);
+                            }
+                        });
 
         BuildkitSessionBridge bridge = new BuildkitSessionBridge(socket, executor, requestObserver);
         bridge.startSocketReader();

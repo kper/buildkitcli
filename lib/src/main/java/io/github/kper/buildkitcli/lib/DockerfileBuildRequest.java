@@ -6,6 +6,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * Request to build docker image from a docker file.
+ */
 public final class DockerfileBuildRequest {
     private final Path contextDir;
     private final Path dockerfile;

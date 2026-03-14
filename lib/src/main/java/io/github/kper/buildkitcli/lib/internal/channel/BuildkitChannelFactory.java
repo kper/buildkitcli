@@ -15,23 +15,32 @@ import io.netty.channel.kqueue.KQueueEventLoopGroup;
 import io.netty.channel.unix.DomainSocketAddress;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.Locale;
 
+/**
+ * Factory to create connections to the buildkit daemon.
+ */
 public final class BuildkitChannelFactory {
     private static final int MAX_MESSAGE_SIZE = 32 * 1024 * 1024;
 
-    private BuildkitChannelFactory() {}
+    private BuildkitChannelFactory() {
+    }
 
+    /**
+     * Creates channel to the buildkit daemon based on the given configuration.
+     */
     public static ChannelResources create(BuildkitConnectionConfig config) throws IOException {
         URI address = config.address();
         return switch (address.getScheme().toLowerCase(Locale.ROOT)) {
             case "unix" -> createUnixChannel(config);
             case "tcp" -> createTcpChannel(config);
-            default -> throw new IllegalArgumentException("Unsupported BuildKit address scheme: " + address.getScheme());
+            default ->
+                    throw new IllegalArgumentException("Unsupported BuildKit address scheme: " + address.getScheme());
         };
     }
 

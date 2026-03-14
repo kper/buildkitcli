@@ -67,6 +67,10 @@ protobuf {
     }
 }
 
+tasks.javadoc {
+    source = fileTree("src/main/java")
+}
+
 mavenPublishing {
     publishToMavenCentral()
 

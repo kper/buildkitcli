@@ -3,6 +3,9 @@ package io.github.kper.buildkitcli.lib;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Default implementation for reporting build progress in the client.
+ */
 public class PrintingListener implements BuildProgressListener {
     private final Logger logger = LoggerFactory.getLogger(PrintingListener.class);
 

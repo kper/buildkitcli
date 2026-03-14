@@ -2,18 +2,27 @@ package io.github.kper.buildkitcli.lib.internal.solve;
 
 import io.github.kper.buildkitcli.lib.BuildOutputMode;
 import io.github.kper.buildkitcli.lib.DockerfileBuildRequest;
+
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+
 import moby.buildkit.v1.ControlOuterClass;
 
+/**
+ * Factory to create {@link moby.buildkit.v1.ControlOuterClass.SolveRequest}.
+ */
 public final class SolveRequestFactory {
     private static final Set<String> RESERVED_FRONTEND_KEYS = Set.of("filename", "target", "no-cache");
     private static final Set<String> RESERVED_EXPORTER_KEYS = Set.of("name", "push");
 
-    private SolveRequestFactory() {}
+    private SolveRequestFactory() {
+    }
 
+    /**
+     * Create a request.
+     */
     public static ControlOuterClass.SolveRequest create(String ref, String sessionId, DockerfileBuildRequest request) {
         Map<String, String> frontendAttrs = new LinkedHashMap<>();
         frontendAttrs.put("filename", dockerfileName(request.dockerfile()));

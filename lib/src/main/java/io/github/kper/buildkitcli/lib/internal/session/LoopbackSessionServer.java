@@ -18,6 +18,9 @@ import java.util.concurrent.TimeUnit;
 import moby.filesync.v1.FileSendGrpc;
 import moby.filesync.v1.FileSyncGrpc;
 
+/**
+ * LoopbackSessionServer.
+ */
 public final class LoopbackSessionServer implements AutoCloseable {
     private final Server server;
     private final InetSocketAddress address;
@@ -27,6 +30,9 @@ public final class LoopbackSessionServer implements AutoCloseable {
         this.address = address;
     }
 
+    /**
+     * Start the server.
+     */
     public static LoopbackSessionServer start(Map<String, Path> sharedDirs, Path exportFile) throws IOException {
         InetSocketAddress requestedAddress = new InetSocketAddress(InetAddress.getLoopbackAddress(), 0);
         HealthStatusManager health = new HealthStatusManager();

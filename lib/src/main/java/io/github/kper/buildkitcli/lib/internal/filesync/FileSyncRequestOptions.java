@@ -1,12 +1,16 @@
 package io.github.kper.buildkitcli.lib.internal.filesync;
 
 import io.grpc.Metadata;
+
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Options for syncing files between daemon and client.
+ */
 public record FileSyncRequestOptions(
         String dirName,
         List<String> includePatterns,
