@@ -16,7 +16,7 @@ Pure Java BuildKit client plus a separate CLI built on top of the library.
 
 Current scope is intentionally small:
 
-- Supported exporters: `type=image`, `type=docker` (for local `docker load`)
+- Supported exporters: `type=image`, `type=docker` (for local `docker load`), local artifact export to a client directory
 - Supported auth mode: anonymous/public registries only
 - Supported local context file types: regular files, directories, symlinks
 

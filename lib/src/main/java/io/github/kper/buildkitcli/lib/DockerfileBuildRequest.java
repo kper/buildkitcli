@@ -15,6 +15,7 @@ public final class DockerfileBuildRequest {
     private final String imageName;
     private final boolean push;
     private final BuildOutputMode outputMode;
+    private final Path localOutputDir;
     private final String target;
     private final Map<String, String> buildArgs;
     private final boolean noCache;
@@ -27,6 +28,7 @@ public final class DockerfileBuildRequest {
         this.imageName = builder.imageName;
         this.push = builder.push;
         this.outputMode = builder.outputMode;
+        this.localOutputDir = builder.localOutputDir == null ? null : builder.localOutputDir.toAbsolutePath().normalize();
         this.target = builder.target;
         this.buildArgs = Map.copyOf(builder.buildArgs);
         this.noCache = builder.noCache;
@@ -46,11 +48,20 @@ public final class DockerfileBuildRequest {
         if (!Files.isRegularFile(dockerfile)) {
             throw new IllegalArgumentException("dockerfile must be an existing file: " + dockerfile);
         }
-        if (imageName.isBlank()) {
+        if (outputMode.requiresImageName() && imageName.isBlank()) {
             throw new IllegalArgumentException("imageName must not be blank");
         }
-        if (outputMode == BuildOutputMode.DOCKER && push) {
-            throw new IllegalArgumentException("push is not supported with docker output mode");
+        if (!outputMode.supportsPush() && push) {
+            throw new IllegalArgumentException("push is not supported with " + outputMode.name().toLowerCase() + " output mode");
+        }
+        if (outputMode == BuildOutputMode.LOCAL && localOutputDir == null) {
+            throw new IllegalArgumentException("localOutputDir must be set with local output mode");
+        }
+        if (outputMode != BuildOutputMode.LOCAL && localOutputDir != null) {
+            throw new IllegalArgumentException("localOutputDir is only supported with local output mode");
+        }
+        if (localOutputDir != null && Files.exists(localOutputDir) && !Files.isDirectory(localOutputDir)) {
+            throw new IllegalArgumentException("localOutputDir must be a directory when it exists: " + localOutputDir);
         }
     }
 
@@ -72,6 +83,10 @@ public final class DockerfileBuildRequest {
 
     public BuildOutputMode outputMode() {
         return outputMode;
+    }
+
+    public Path localOutputDir() {
+        return localOutputDir;
     }
 
     public String target() {
@@ -100,6 +115,7 @@ public final class DockerfileBuildRequest {
         private final String imageName;
         private boolean push;
         private BuildOutputMode outputMode = BuildOutputMode.IMAGE;
+        private Path localOutputDir;
         private String target;
         private final Map<String, String> buildArgs = new LinkedHashMap<>();
         private boolean noCache;
@@ -119,6 +135,11 @@ public final class DockerfileBuildRequest {
 
         public Builder outputMode(BuildOutputMode value) {
             this.outputMode = Objects.requireNonNull(value, "value");
+            return this;
+        }
+
+        public Builder localOutputDir(Path value) {
+            this.localOutputDir = Objects.requireNonNull(value, "value");
             return this;
         }
 

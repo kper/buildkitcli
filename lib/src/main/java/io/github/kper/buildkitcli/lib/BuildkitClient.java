@@ -10,11 +10,17 @@ import io.github.kper.buildkitcli.lib.internal.solve.SolveRequestFactory;
 import io.grpc.Context;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -97,7 +103,8 @@ public final class BuildkitClient implements AutoCloseable {
 
             waitForStatusQuiescence(statusContext, lastStatusActivity, statusFuture);
             verifyExportedArchive(exportedArchive);
-            return toResult(ref, response, exportedArchive);
+            Path exportedArtifact = finalizeExport(request, exportedArchive);
+            return toResult(ref, response, exportedArtifact);
         } catch (IOException e) {
             deleteIfExists(exportedArchive);
             throw new BuildkitException("Failed to start BuildKit session bridge", e);
@@ -220,6 +227,76 @@ public final class BuildkitClient implements AutoCloseable {
             return Files.createTempFile("buildkit-export-", "." + outputMode.name().toLowerCase() + ".tar");
         } catch (IOException e) {
             throw new BuildkitException("Failed to create exporter output file", e);
+        }
+    }
+
+    private static Path finalizeExport(DockerfileBuildRequest request, Path exportedArchive) throws BuildkitException {
+        if (exportedArchive == null) {
+            return null;
+        }
+        if (request.outputMode() != BuildOutputMode.LOCAL) {
+            return exportedArchive;
+        }
+        try {
+            extractTarArchive(exportedArchive, request.localOutputDir());
+            return null;
+        } finally {
+            deleteIfExists(exportedArchive);
+        }
+    }
+
+    private static void extractTarArchive(Path tarArchive, Path destinationDir) throws BuildkitException {
+        try {
+            Files.createDirectories(destinationDir);
+            try (InputStream inputStream = Files.newInputStream(tarArchive);
+                 TarArchiveInputStream tarInput = new TarArchiveInputStream(new BufferedInputStream(inputStream))) {
+                TarArchiveEntry entry;
+                while ((entry = tarInput.getNextEntry()) != null) {
+                    Path target = resolveExtractedPath(destinationDir, entry.getName());
+                    if (entry.isDirectory()) {
+                        Files.createDirectories(target);
+                    } else if (entry.isSymbolicLink()) {
+                        createSymlink(target, Path.of(entry.getLinkName()));
+                    } else if (entry.isFile()) {
+                        Files.createDirectories(target.getParent());
+                        Files.copy(tarInput, target, StandardCopyOption.REPLACE_EXISTING);
+                    } else {
+                        throw new BuildkitException("Unsupported tar entry type in exporter output: " + entry.getName());
+                    }
+                    applyEntryMetadata(target, entry);
+                }
+            }
+        } catch (IOException e) {
+            throw new BuildkitException("Failed to extract local output archive", e);
+        }
+    }
+
+    private static Path resolveExtractedPath(Path destinationDir, String entryName) throws BuildkitException {
+        Path normalizedDestination = destinationDir.toAbsolutePath().normalize();
+        Path resolved = normalizedDestination.resolve(entryName).normalize();
+        if (!resolved.startsWith(normalizedDestination)) {
+            throw new BuildkitException("Refusing to extract entry outside destination: " + entryName);
+        }
+        return resolved;
+    }
+
+    private static void createSymlink(Path target, Path linkTarget) throws IOException {
+        Files.createDirectories(target.getParent());
+        Files.deleteIfExists(target);
+        Files.createSymbolicLink(target, linkTarget);
+    }
+
+    private static void applyEntryMetadata(Path target, TarArchiveEntry entry) throws IOException {
+        try {
+            Files.setLastModifiedTime(target, FileTime.fromMillis(entry.getModTime().getTime()));
+        } catch (UnsupportedOperationException ignored) {
+        }
+        try {
+            int mode = entry.getMode() & 0777;
+            if (mode != 0) {
+                Files.setAttribute(target, "unix:mode", mode);
+            }
+        } catch (UnsupportedOperationException ignored) {
         }
     }
 

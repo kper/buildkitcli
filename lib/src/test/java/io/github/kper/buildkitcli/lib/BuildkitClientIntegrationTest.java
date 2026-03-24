@@ -129,6 +129,50 @@ class BuildkitClientIntegrationTest {
         }
     }
 
+    @Test
+    void exportsArtifactsToLocalOutputDirectory() throws Exception {
+        Assumptions.assumeTrue(DockerClientFactory.instance().isDockerAvailable(), "Docker is not available");
+
+        try (GenericContainer<?> buildkit = new GenericContainer<>("moby/buildkit:v0.28.0")
+                .withPrivilegedMode(true)
+                .withExposedPorts(1234)
+                .withCommand("--addr", "tcp://0.0.0.0:1234")
+                .waitingFor(Wait.forListeningPort())) {
+            buildkit.start();
+
+            Path contextDir = Files.createDirectory(tempDir.resolve("context-local"));
+            Path dockerfile = Files.writeString(contextDir.resolve("Dockerfile"), """
+                    FROM busybox AS builder
+                    RUN mkdir -p /out && \
+                        printf 'hello from build\\n' > /out/myapp && \
+                        printf 'coverage: 100%%\\n' > /out/coverage.txt
+
+                    FROM scratch AS artifacts
+                    COPY --from=builder /out/myapp /
+                    COPY --from=builder /out/coverage.txt /
+                    """);
+            Path outputDir = tempDir.resolve("dist");
+
+            BuildkitConnectionConfig config = new BuildkitConnectionConfig(
+                    URI.create("tcp://" + buildkit.getHost() + ":" + buildkit.getMappedPort(1234)),
+                    Duration.ofMinutes(2),
+                    null);
+
+            DockerfileBuildRequest request = DockerfileBuildRequest.builder(contextDir, dockerfile, "")
+                    .outputMode(BuildOutputMode.LOCAL)
+                    .localOutputDir(outputDir)
+                    .target("artifacts")
+                    .build();
+
+            try (BuildkitClient client = new BuildkitClient(config)) {
+                BuildResult result = client.buildImage(request, BuildProgressListener.NOOP);
+                assertThat(result.exportedArchive()).isNull();
+                assertThat(Files.readString(outputDir.resolve("myapp"))).isEqualTo("hello from build\n");
+                assertThat(Files.readString(outputDir.resolve("coverage.txt"))).isEqualTo("coverage: 100%\n");
+            }
+        }
+    }
+
     private static TlsTestMaterials tlsTestMaterialsFromResources() throws URISyntaxException {
         // To regenerate these fixtures:
         //   TLS_DIR=lib/src/test/resources/io/github/kper/buildkitcli/lib/tls

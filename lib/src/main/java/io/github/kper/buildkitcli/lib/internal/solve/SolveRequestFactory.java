@@ -37,7 +37,9 @@ public final class SolveRequestFactory {
         frontendAttrs.putAll(request.extraFrontendAttrs());
 
         Map<String, String> exporterAttrs = new LinkedHashMap<>();
-        exporterAttrs.put("name", request.imageName());
+        if (request.outputMode().requiresImageName()) {
+            exporterAttrs.put("name", request.imageName());
+        }
         if (request.push()) {
             exporterAttrs.put("push", "true");
         }

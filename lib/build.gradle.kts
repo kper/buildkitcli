@@ -29,6 +29,7 @@ dependencies {
     implementation("com.google.protobuf:protobuf-java:$protobufVersion")
     implementation("com.google.api.grpc:proto-google-common-protos:$googleCommonProtoVersion")
     implementation("com.google.code.findbugs:jsr305:3.0.2")
+    implementation("org.apache.commons:commons-compress:1.28.0")
     implementation("org.slf4j:slf4j-api:${slf4jVersion}")
 
     implementation("io.netty:netty-transport-classes-epoll:$nettyVersion")

@@ -91,4 +91,38 @@ class SolveRequestFactoryTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("push is not supported");
     }
+
+    @Test
+    void createsSolveRequestForLocalOutput() throws Exception {
+        Path contextDir = Files.createDirectory(tempDir.resolve("context5"));
+        Path dockerfile = Files.writeString(tempDir.resolve("Dockerfile.local"), "FROM scratch\n");
+        Path outputDir = tempDir.resolve("dist");
+
+        DockerfileBuildRequest request = DockerfileBuildRequest.builder(contextDir, dockerfile, "")
+                .outputMode(BuildOutputMode.LOCAL)
+                .localOutputDir(outputDir)
+                .build();
+
+        var solveRequest = SolveRequestFactory.create("ref789", "session789", request);
+
+        assertThat(solveRequest.getExportersList()).singleElement().satisfies(exporter -> {
+            assertThat(exporter.getType()).isEqualTo("tar");
+            assertThat(exporter.getAttrsMap()).isEmpty();
+        });
+        assertThat(solveRequest.getEnableSessionExporter()).isTrue();
+        assertThat(solveRequest.getExporterDeprecated()).isEmpty();
+        assertThat(solveRequest.getExporterAttrsDeprecatedMap()).isEmpty();
+    }
+
+    @Test
+    void rejectsLocalOutputModeWithoutDestinationDirectory() throws Exception {
+        Path contextDir = Files.createDirectory(tempDir.resolve("context6"));
+        Path dockerfile = Files.writeString(tempDir.resolve("Dockerfile.local.missing"), "FROM scratch\n");
+
+        assertThatThrownBy(() -> DockerfileBuildRequest.builder(contextDir, dockerfile, "")
+                        .outputMode(BuildOutputMode.LOCAL)
+                        .build())
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("localOutputDir must be set");
+    }
 }
